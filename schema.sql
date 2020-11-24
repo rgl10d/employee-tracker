@@ -14,14 +14,16 @@ CREATE TABLE employee (
 
 CREATE TABLE department (
   id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(30) NOT NULL
+  name VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id)
 );
 
 CREATE TABLE roles (
   id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
   salary DECIMAL (10,4) NOT NULL,
-  department_id INT NOT NULL
+  department_id INT NOT NULL,
+  PRIMARY KEY (id)
 );
 
 SELECT * FROM employee;
