@@ -71,7 +71,39 @@ function runTracker() {
     });
 }
 
-// FUNCTION TO ADD A NEW EMPLOYEE
+// FUNCTION TO VIEW ALL EMPLOYEES
+
+function viewEmployees() {
+    connection.query("SELECT * FROM employee", (err, results) => {
+        if(err) throw err;
+        return console.table(results);
+    });
+    // runTracker();
+    connection.end();
+};
+
+// FUNCTION TO VIEW ALL DEPARTMENTS
+function viewDepartments() {
+    connection.query("SELECT * FROM department", (err, results) => {
+        if(err) throw err;
+        return console.table(results);
+    });
+    // runTracker();
+    connection.end();
+};
+
+// FUNCTION TO VIEW ALL ROLES
+
+function viewRoles() {
+    connection.query("SELECT * FROM roles", (err, results) => {
+        if(err) throw err;
+        return console.table(results);
+    });
+    // runTracker();
+    connection.end();
+};
+
+// FUNCTION TO ADD A NEW EMPLOYEE (ADD MANAGER ID)
 function addEmployee() {
   connection.query("SELECT * FROM roles", (err, results) => {
     inquirer
@@ -231,4 +263,6 @@ function addRole() {
         );
       });
   });
-}
+};
+
+
