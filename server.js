@@ -11,10 +11,10 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
   if (err) throw err;
-  runManager();
+  runTracker();
 });
 
-function runManager() {
+function runTracker() {
   inquirer
     .prompt({
       name: "action",
@@ -32,39 +32,81 @@ function runManager() {
       ],
     })
     .then(function (answer) {
-        console.log(answer);
-    //   switch (answer.action) {
-    //     case "View all employees":
-    //       viewEmployees();
-    //       break;
+      console.log(answer);
+        switch (answer.action) {
+          case "View all employees":
+            viewEmployees();
+            break;
 
-    //     case "View all departments":
-    //       viewDepartments();
-    //       break;
+          case "View all departments":
+            viewDepartments();
+            break;
 
-    //     case "View all roles":
-    //       viewRoles();
-    //       break;
+          case "View all roles":
+            viewRoles();
+            break;
 
-    //     case "Add a new employee":
-    //       addEmployee();
-    //       break;
+          case "Add a new employee":
+            addEmployee();
+            break;
 
-    //     case "Create a new department":
-    //       addDepartment();
-    //       break;
+          case "Create a new department":
+            addDepartment();
+            break;
 
-    //     case "Create a new role":
-    //       addRole();
-    //       break;
+          case "Create a new role":
+            addRole();
+            break;
 
-    //     case "Update an employee":
-    //       updateEmployee();
-    //       break;
+          case "Update an employee":
+            updateEmployee();
+            break;
 
-    //     case "Exit":
-    //       connection.end();
-    //       break;
-    //   }
+          case "Exit":
+            connection.end();
+            break;
+        }
     });
-}
+};
+
+function addEmployee() {
+    inquirer
+    .prompt([
+      {
+        name: "firstName",
+        type: "input",
+        message: "What is the employee's first name?",
+        validate: function(value) {
+          if (value === "") {
+            return false;
+          }
+          return true;
+        }
+      },
+      {
+        name: "lastName",
+        type: "input",
+        message: "What is the employee's last name?",
+        validate: function(value) {
+          if (value === "") {
+            return false;
+          }
+          return true;
+        }
+      }
+    ])
+    .then(function(answer) {
+      console.log(answer);
+      connection.query(
+      "INSERT INTO employee SET ?", {
+        first_name: answer.firstName,
+        last_name: answer.lastName,
+        role_id: 23
+      }, 
+      function(err, res) {
+        if (err) throw err;
+        runTracker();
+        }
+      );
+    });
+};
