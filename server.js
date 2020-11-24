@@ -78,6 +78,7 @@ function addEmployee() {
         message: "What is the employee's first name?",
         validate: function(value) {
           if (value === "") {
+            console.log("Please enter a name.");
             return false;
           }
           return true;
@@ -89,6 +90,7 @@ function addEmployee() {
         message: "What is the employee's last name?",
         validate: function(value) {
           if (value === "") {
+            console.log("Please enter a name.");
             return false;
           }
           return true;
@@ -102,6 +104,36 @@ function addEmployee() {
         first_name: answer.firstName,
         last_name: answer.lastName,
         role_id: 23
+      }, 
+      function(err, res) {
+        if (err) throw err;
+        runTracker();
+        }
+      );
+    });
+};
+
+function addDepartment() {
+    inquirer
+    .prompt([
+      {
+        name: "name",
+        type: "input",
+        message: "What is the name of this department?",
+        validate: function(value) {
+          if (value === "") {
+            console.log("Please enter a name.");
+            return false;
+          }
+          return true;
+        }
+      },
+    ])
+    .then(function(answer) {
+      console.log(answer);
+      connection.query(
+      "INSERT INTO department SET ?", {
+        name: answer.name
       }, 
       function(err, res) {
         if (err) throw err;
