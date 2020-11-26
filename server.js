@@ -283,7 +283,7 @@ function addRole() {
       .then(function (answer) {
         for (var i = 0; i < results.length; i++) {
           if (answer.department === results[i].name) {
-            answer.department = results[i].id;
+            answer.department = results[i].department_id;
           }
         }
         console.log(answer);
