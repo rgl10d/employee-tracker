@@ -122,7 +122,6 @@ function addEmployee() {
   let roleArray = [];
   let employeeArray = [{ name: "None", value: null }];
   connection.query("SELECT title, role_id FROM roles", (err, results) => {
-    console.log(results);
     if (err) throw err;
     for (let i = 0; i < results.length; i++) {
       roleArray.push({
@@ -130,7 +129,9 @@ function addEmployee() {
         value: results[i].role_id,
       });
     }
-    connection.query("SELECT first_name, last_name, id FROM employee", (err, response) => {
+    connection.query(
+      "SELECT first_name, last_name, id FROM employee",
+      (err, response) => {
         if (err) throw err;
         for (let i = 0; i < response.length; i++) {
           employeeArray.push({
@@ -304,35 +305,52 @@ function addRole() {
 
 // FUNCTION TO UPDATE EXISTING EMPLOYEE ROLE
 function updateEmployee() {
-  connection.query("SELECT * FROM roles", function (err, results) {
-    if (err) throw err;
-    inquirer
-      .prompt({
-        name: "idSelection",
-        type: "list",
-        message: "Which employee would you like to update?",
-        choices: () => {
-          const employeeArray = [];
-          for (var i = 0; i < results.length; i++) {
-            employeeArray.push({
-              name: results[i].title,
-              value: results[i].role_id,
-            });
-          }
-          return employeeArray;
-        },
-      })
-      .then(function (answer) {
-        connection.query(
-          "UPDATE employee SET role_id = ? WHERE id = ?",
-          [answer.idSelection, answer.idSelection],
-          function (err) {
-            if (err) throw err;
-            console.log("The role has been updated");
-            runTracker();
-          }
-        );
+  let roleArray = [];
+  let employeeArray = [];
+  connection.query(
+    "SELECT first_name, last_name, id FROM employee",
+    (err, response) => {
+      if (err) throw err;
+      for (let i = 0; i < response.length; i++) {
+        employeeArray.push({
+          name: response[i].first_name + " " + response[i].last_name,
+          value: response[i].id,
+        });
+      }
+      connection.query("SELECT title, role_id FROM roles", (err, results) => {
+        if (err) throw err;
+        for (let i = 0; i < results.length; i++) {
+          roleArray.push({
+            name: results[i].title,
+            value: results[i].role_id,
+          });
+        }
+        inquirer
+          .prompt([
+            {
+              name: "employeeSelection",
+              type: "list",
+              message: "Which employee would you like to update?",
+              choices: employeeArray,
+            },
+            {
+              name: "roleSelection",
+              type: "list",
+              message: "What role will the employee have now?",
+              choices: roleArray,
+            }
+          ])
+          .then(function (answer) {
+            connection.query(
+              "UPDATE employee SET role_id = ? WHERE id = ?",
+              [answer.roleSelection, answer.employeeSelection],
+              function (err) {
+                if (err) throw err;
+                runTracker();
+              }
+            );
+          });
       });
-  });
+    }
+  );
 }
-
