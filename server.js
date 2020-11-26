@@ -29,12 +29,12 @@ function runTracker() {
         "Add a new employee",
         "Create a new department",
         "Create a new role",
-        "Update an employee",
+        "Update an employee role",
+        "Delete an employee",
         "Exit",
       ],
     })
     .then(function (answer) {
-      console.log(answer);
       switch (answer.action) {
         case "View all employees":
           viewEmployees();
@@ -60,8 +60,12 @@ function runTracker() {
           addRole();
           break;
 
-        case "Update an employee":
+        case "Update an employee role":
           updateEmployee();
+          break;
+
+        case "Delete an employee":
+          deleteEmployee();
           break;
 
         case "Exit":
@@ -72,99 +76,132 @@ function runTracker() {
 }
 
 // FUNCTION TO VIEW ALL EMPLOYEES
-
 function viewEmployees() {
-    connection.query("SELECT * FROM employee", (err, results) => {
-        if(err) throw err;
-        return console.table(results);
-    });
-    // runTracker();
-    connection.end();
-};
+  connection.query(
+    "SELECT employee.id, first_name, last_name, roles.title, department.name AS department, roles.salary FROM employee INNER JOIN roles ON employee.role_id = roles.role_id INNER JOIN department ON roles.department_id = department.department_id",
+    (err, results) => {
+      if (err) throw err;
+      console.log("\n");
+      console.table(results);
+      console.log("===============================");
+      console.log("\n \n \n \n \n \n \n");
+    }
+  );
+  // RETURN TO MAIN LIST
+  runTracker();
+}
 
 // FUNCTION TO VIEW ALL DEPARTMENTS
 function viewDepartments() {
-    connection.query("SELECT * FROM department", (err, results) => {
-        if(err) throw err;
-        return console.table(results);
-    });
-    // runTracker();
-    connection.end();
-};
+  connection.query("SELECT name FROM department", (err, results) => {
+    if (err) throw err;
+    console.log("\n");
+    console.table(results);
+    console.log("===============================");
+    console.log("\n \n \n \n \n \n \n");
+  });
+  // RETURN TO MAIN LIST
+  runTracker();
+}
 
 // FUNCTION TO VIEW ALL ROLES
-
 function viewRoles() {
-    connection.query("SELECT * FROM roles", (err, results) => {
-        if(err) throw err;
-        return console.table(results);
-    });
-    // runTracker();
-    connection.end();
-};
+  connection.query("SELECT title FROM roles", (err, results) => {
+    if (err) throw err;
+    console.log("\n");
+    console.table(results);
+    console.log("===============================");
+    console.log("\n \n \n \n \n \n \n");
+  });
+  // RETURN TO MAIN LIST
+  runTracker();
+}
 
 // FUNCTION TO ADD A NEW EMPLOYEE (ADD MANAGER ID)
 function addEmployee() {
-  connection.query("SELECT * FROM roles", (err, results) => {
-    inquirer
-      .prompt([
-        {
-          name: "firstName",
-          type: "input",
-          message: "What is the employee's first name?",
-          validate: function (value) {
-            if (value === "") {
-              console.log("Please enter a name.");
-              return false;
-            }
-            return true;
-          },
-        },
-        {
-          name: "lastName",
-          type: "input",
-          message: "What is the employee's last name?",
-          validate: function (value) {
-            if (value === "") {
-              console.log("Please enter a name.");
-              return false;
-            }
-            return true;
-          },
-        },
-        {
-          name: "role",
-          type: "list",
-          message: "What is the employee's role?",
-          choices: () => {
-            const choiceArray = [];
-            for (let i = 0; i < results.length; i++) {
-              choiceArray.push(results[i].title);
-            }
-            return choiceArray;
-          },
-        },
-      ])
-      .then(function (answer) {
-        console.log(answer);
-        for (var i = 0; i < results.length; i++) {
-          if (answer.role === results[i].title) {
-            answer.role = results[i].id;
-          }
-        }
-        connection.query(
-          "INSERT INTO employee SET ?",
-          {
-            first_name: answer.firstName,
-            last_name: answer.lastName,
-            role_id: answer.role,
-          },
-          function (err, res) {
-            if (err) throw err;
-            runTracker();
-          }
-        );
+  let roleArray = [];
+  let employeeArray = [{ name: "None", value: null }];
+  connection.query("SELECT title, role_id FROM roles", (err, results) => {
+    console.log(results);
+    if (err) throw err;
+    for (let i = 0; i < results.length; i++) {
+      roleArray.push({
+        name: results[i].title,
+        value: results[i].role_id,
       });
+    }
+    connection.query("SELECT first_name, last_name, id FROM employee", (err, response) => {
+        if (err) throw err;
+        for (let i = 0; i < response.length; i++) {
+          employeeArray.push({
+            name: response[i].first_name + " " + response[i].last_name,
+            value: response[i].id,
+          });
+        }
+        inquirer
+          .prompt([
+            {
+              name: "firstName",
+              type: "input",
+              message: "What is the employee's first name?",
+              validate: function (value) {
+                if (value === "") {
+                  console.log("Please enter a name.");
+                  return false;
+                }
+                return true;
+              },
+            },
+            {
+              name: "lastName",
+              type: "input",
+              message: "What is the employee's last name?",
+              validate: function (value) {
+                if (value === "") {
+                  console.log("Please enter a name.");
+                  return false;
+                }
+                return true;
+              },
+            },
+            {
+              name: "role",
+              type: "list",
+              message: "What is the employee's role?",
+              choices: roleArray,
+            },
+            {
+              name: "manager",
+              type: "list",
+              message: "Who is the employee's manager?",
+              choices: employeeArray,
+            },
+          ])
+          .then(function (answer) {
+            for (var i = 0; i < results.length; i++) {
+              if (answer.role === results[i].title) {
+                answer.role = results[i].role_id;
+              }
+              if (answer.manager === results[i].last_name) {
+                answer.manager = results[i].id;
+              }
+            }
+            connection.query(
+              "INSERT INTO employee SET ?",
+              {
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+                role_id: answer.role,
+                manager_id: answer.manager,
+              },
+              function (err, res) {
+                if (err) throw err;
+                runTracker();
+              }
+            );
+          });
+      }
+    );
   });
 }
 
@@ -263,6 +300,39 @@ function addRole() {
         );
       });
   });
-};
+}
 
+// FUNCTION TO UPDATE EXISTING EMPLOYEE ROLE
+function updateEmployee() {
+  connection.query("SELECT * FROM roles", function (err, results) {
+    if (err) throw err;
+    inquirer
+      .prompt({
+        name: "idSelection",
+        type: "list",
+        message: "Which employee would you like to update?",
+        choices: () => {
+          const employeeArray = [];
+          for (var i = 0; i < results.length; i++) {
+            employeeArray.push({
+              name: results[i].title,
+              value: results[i].role_id,
+            });
+          }
+          return employeeArray;
+        },
+      })
+      .then(function (answer) {
+        connection.query(
+          "UPDATE employee SET role_id = ? WHERE id = ?",
+          [answer.idSelection, answer.idSelection],
+          function (err) {
+            if (err) throw err;
+            console.log("The role has been updated");
+            runTracker();
+          }
+        );
+      });
+  });
+}
 

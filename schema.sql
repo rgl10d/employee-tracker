@@ -13,17 +13,22 @@ CREATE TABLE employee (
 );
 
 CREATE TABLE department (
-  id INT NOT NULL AUTO_INCREMENT,
+  department_id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(30) NOT NULL,
-  PRIMARY KEY (id)
+  PRIMARY KEY (department_id)
 );
 
 CREATE TABLE roles (
-  id INT NOT NULL AUTO_INCREMENT,
+  role_id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(30) NOT NULL,
   salary DECIMAL (10,4) NOT NULL,
   department_id INT NOT NULL,
-  PRIMARY KEY (id)
+   PRIMARY KEY (role_id)
 );
 
-SELECT * FROM employee;
+
+SELECT * FROM employee,roles;
+SELECT * FROM department;
+SELECT * FROM roles;
+
+INSERT INTO employee (first_name, last_name, role_id) VALUES ("Billy", "Bob", 2);
